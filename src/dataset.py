@@ -159,17 +159,28 @@ class NameDataset(Dataset):
 
     def __len__(self):
         return len(self.data) - 1
-
     def __getitem__(self, idx):
         inp, oup = self.data[idx].split('\t')
-        x = inp + self.MASK_CHAR + oup + self.MASK_CHAR
-        x = x + self.PAD_CHAR*(self.block_size - len(x))
-        y = self.PAD_CHAR*(len(inp)-1) + x[len(inp):]
+        full = inp + self.MASK_CHAR + oup + self.MASK_CHAR       
+        full += self.PAD_CHAR * (self.block_size + 1 - len(full)) 
+        
+        x_str = full[:-1]                                       
+        y_str = full[1:]                              
+        y_str = self.PAD_CHAR * len(inp) + y_str[len(inp):]
 
-        x = x[:-1]
-        x = torch.tensor([self.stoi[c] for c in x], dtype=torch.long)
-        y = torch.tensor([self.stoi[c] for c in y], dtype=torch.long)
+        x = torch.tensor([self.stoi[c] for c in x_str], dtype=torch.long)
+        y = torch.tensor([self.stoi[c] for c in y_str], dtype=torch.long)
         return x, y
+    # def __getitem__(self, idx):
+    #     inp, oup = self.data[idx].split('\t')
+    #     x = inp + self.MASK_CHAR + oup + self.MASK_CHAR
+    #     x = x + self.PAD_CHAR*(self.block_size + 1 - len(x))
+    #     y = self.PAD_CHAR*(len(inp)-1) + x[len(inp):]
+
+    #     x = x[:-1]
+    #     x = torch.tensor([self.stoi[c] for c in x], dtype=torch.long)
+    #     y = torch.tensor([self.stoi[c] for c in y], dtype=torch.long)
+    #     return x, y
 
 
 # Code below is strictly for your debugging purposes; feel free to modify

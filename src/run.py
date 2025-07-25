@@ -203,9 +203,6 @@ if __name__ == "__main__":
         #     You can use the args.reading_params_path flag to switch between the
         #     number of epochs for each case.
 
-        ### YOUR CODE HERE ###
-        pass
-        ### END YOUR CODE ###
     elif args.function == 'evaluate':
         assert args.outputs_path is not None
         assert args.reading_params_path is not None
