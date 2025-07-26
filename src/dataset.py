@@ -159,31 +159,17 @@ class NameDataset(Dataset):
 
     def __len__(self):
         return len(self.data) - 1
+    
     def __getitem__(self, idx):
         inp, oup = self.data[idx].split('\t')
-        full = inp + self.MASK_CHAR + oup + self.MASK_CHAR       
-        full += self.PAD_CHAR * (self.block_size + 1 - len(full)) 
-        
-        x_str = full[:-1]                                       
-        y_str = full[1:]                              
-        # Pad out the *question* part only (exclude the first MASK_CHAR), so that
-        # the first character the model is asked to predict is the MASK_CHAR
-        # itself.  We therefore pad out the first len(inp)-1 characters.
-        y_str = self.PAD_CHAR * (len(inp) - 1) + y_str[len(inp)-1:]
+        x = inp + self.MASK_CHAR + oup + self.MASK_CHAR
+        x = x + self.PAD_CHAR*(self.block_size + 1 - len(x))  # +1 to make total length block_size+1
+        y = self.PAD_CHAR*(len(inp)-1) + x[len(inp):]
 
-        x = torch.tensor([self.stoi[c] for c in x_str], dtype=torch.long)
-        y = torch.tensor([self.stoi[c] for c in y_str], dtype=torch.long)
+        x = x[:-1]  # Now x has length block_size
+        x = torch.tensor([self.stoi[c] for c in x], dtype=torch.long)
+        y = torch.tensor([self.stoi[c] for c in y], dtype=torch.long)
         return x, y
-    # def __getitem__(self, idx):
-    #     inp, oup = self.data[idx].split('\t')
-    #     x = inp + self.MASK_CHAR + oup + self.MASK_CHAR
-    #     x = x + self.PAD_CHAR*(self.block_size + 1 - len(x))
-    #     y = self.PAD_CHAR*(len(inp)-1) + x[len(inp):]
-
-    #     x = x[:-1]
-    #     x = torch.tensor([self.stoi[c] for c in x], dtype=torch.long)
-    #     y = torch.tensor([self.stoi[c] for c in y], dtype=torch.long)
-    #     return x, y
 
 
 # Code below is strictly for your debugging purposes; feel free to modify
