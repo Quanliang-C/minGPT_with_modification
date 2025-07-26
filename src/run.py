@@ -112,12 +112,12 @@ if __name__ == "__main__":
 
         ### YOUR CODE HERE ###
         tconf = trainer.TrainerConfig(
-            max_epochs=1200,  # 更保守的epochs数 (原来650)
+            max_epochs=650,  # 更保守的epochs数 (原来650)
             batch_size=256,  # 保持2x batch size
             learning_rate=args.pretrain_lr,
             lr_decay=True,
             warmup_tokens=512*20,
-            final_tokens=1200*len(pretrain_dataset)*block_size,  # 相应调整final_tokens
+            final_tokens=650*len(pretrain_dataset)*block_size,  # 相应调整final_tokens
             num_workers=4,
             writer=writer
         )
