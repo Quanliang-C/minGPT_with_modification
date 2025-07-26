@@ -140,15 +140,15 @@ if __name__ == "__main__":
         if args.reading_params_path is not None:
             model.load_state_dict(torch.load(args.reading_params_path))
             print("pretrained model loaded")
-            tconf = trainer.TrainerConfig(
-                max_epochs=50,   # 增加epochs以更好学习映射
-                batch_size=512,  # 保持batch size
-                learning_rate=args.finetune_lr * 0.7,  # 稍微降低学习率
+            trainer_cfg = trainer.TrainerConfig(
+                max_epochs=10,  # 减少epochs避免过拟合
+                batch_size=128,  # 减少batch以更精细更新
+                learning_rate=args.finetune_lr,  # 恢复原lr 6e-4
                 lr_decay=True,
-                warmup_tokens=512*20,
-                final_tokens=200*len(pretrain_dataset)*block_size,
+                warmup_tokens=512 * 20,
+                final_tokens=200 * len(pretrain_dataset) * block_size,
                 num_workers=4,
-                writer=writer
+                writer=writer,
             )
         else:
             tconf = trainer.TrainerConfig(
