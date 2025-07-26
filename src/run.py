@@ -63,7 +63,6 @@ if __name__ == "__main__":
         n_embd=256)
 
     # define models.
-    # note: models should moved to device defined on lines 30-34.
 
     model = None
     if args.variant == 'vanilla':
@@ -89,28 +88,8 @@ if __name__ == "__main__":
     # Perform pretraining, finetuning, or evaluation
     if args.function == 'pretrain':
         assert args.writing_params_path is not None
-        # TODO [part f]:
-        # - Given:
-        #     1. A corpus specified in args.pretrain_corpus_path
-        #     2. An output path args.writing_params_path for the model parameters
-        # - Goals:
-        #     1. Pretrain the model on this corpus
-        #     2. Save the resulting model in args.writing_params_path
+        # MY CODE HERE
 
-
-
-        # - Make sure to use the following hyperparameters for pretraining:
-        # Hyperparameters for pretraining:
-        # max_epochs=650
-        # batch_size=128
-        # learning_rate=args.pretrain_lr
-        # lr_decay=True
-        # warmup_tokens=512*20
-        # final_tokens=650*len(pretrain_dataset)*block_size
-        # num_workers=4
-        # writer=writer
-
-        ### YOUR CODE HERE ###
         tconf = trainer.TrainerConfig(
             max_epochs=650,  # 更保守的epochs数 (原来650)
             batch_size=128,  # 保持2x batch size
@@ -122,17 +101,12 @@ if __name__ == "__main__":
             writer=writer
         )
 
-        # with open(args.pretrain_corpus_path, encoding='utf-8') as f:
-        #     pretrain_corpus = f.read()
-
-        # pretrain_dataset = dataset.CharCorruptionDataset(pretrain_corpus, block_size)
-        # print("pretrain dataset created")
         trainer = trainer.Trainer(model, pretrain_dataset, None, tconf)
         trainer.train()
         torch.save(model.state_dict(), args.writing_params_path)
         print(f"Model saved to {args.writing_params_path}")
 
-        ### END YOUR CODE ###
+        ### END MY CODE ###
     elif args.function == 'finetune':
         assert args.writing_params_path is not None
         assert args.finetune_corpus_path is not None
@@ -141,9 +115,9 @@ if __name__ == "__main__":
             model.load_state_dict(torch.load(args.reading_params_path))
             print("pretrained model loaded")
             trainer_cfg = trainer.TrainerConfig(
-                max_epochs=15,  # 减少epochs避免过拟合
-                batch_size=256,  # 减少batch以更精细更新
-                learning_rate=args.finetune_lr,  # 恢复原lr 6e-4
+                max_epochs=15,
+                batch_size=256, 
+                learning_rate=args.finetune_lr,
                 lr_decay=True,
                 warmup_tokens=512 * 20,
                 final_tokens=200 * len(pretrain_dataset) * block_size,
@@ -152,8 +126,8 @@ if __name__ == "__main__":
             )
         else:
             trainer_cfg = trainer.TrainerConfig(
-                max_epochs=40,   # 适中的epochs数
-                batch_size=512,  # 适中的batch size
+                max_epochs=40,
+                batch_size=512,
                 learning_rate=args.finetune_lr,
                 lr_decay=True,
                 warmup_tokens=512*20,
