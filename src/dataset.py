@@ -166,7 +166,10 @@ class NameDataset(Dataset):
         
         x_str = full[:-1]                                       
         y_str = full[1:]                              
-        y_str = self.PAD_CHAR * len(inp) + y_str[len(inp):]
+        # Pad out the *question* part only (exclude the first MASK_CHAR), so that
+        # the first character the model is asked to predict is the MASK_CHAR
+        # itself.  We therefore pad out the first len(inp)-1 characters.
+        y_str = self.PAD_CHAR * (len(inp) - 1) + y_str[len(inp)-1:]
 
         x = torch.tensor([self.stoi[c] for c in x_str], dtype=torch.long)
         y = torch.tensor([self.stoi[c] for c in y_str], dtype=torch.long)
