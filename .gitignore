@@ -1,0 +1,34 @@
+# 忽略 Python 缓存
+__pycache__/
+*.pyc
+
+# 忽略所有模型参数文件
+# PyTorch 通常使用 .pt 或 .pth
+*.pt
+*.pth
+*.safetensors
+
+# 忽略日志和 TensorBoard 文件夹
+expt/
+
+# 忽略数据集文件夹 (如果数据集在项目内)
+vanilla.pretrain.params
+vanilla.finetune.params
+rope.pretrain.params
+rope.finetune.params
+vanilla.pretrain.dev.predictions
+vanilla.pretrain.test.predictions
+rope.pretrain.dev.predictions
+rope.pretrain.test.predictions
+vanilla.finetune.dev.predictions
+vanilla.finetune.test.predictions
+rope.finetune.dev.predictions
+rope.finetune.test.predictions
+wiki.txt
+birth_places_train.tsv
+birth_dev.tsv
+birth_test_inputs.tsv
+
+# 忽略虚拟环境文件夹
+venv/
+.env
