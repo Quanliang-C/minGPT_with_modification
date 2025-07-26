@@ -151,7 +151,7 @@ if __name__ == "__main__":
                 writer=writer,
             )
         else:
-            tconf = trainer.TrainerConfig(
+            trainer_cfg = trainer.TrainerConfig(
                 max_epochs=40,   # 适中的epochs数
                 batch_size=512,  # 适中的batch size
                 learning_rate=args.finetune_lr,
@@ -167,7 +167,7 @@ if __name__ == "__main__":
             finetune_corpus = f.read()
         finetune_dataset = dataset.NameDataset(pretrain_dataset, finetune_corpus)
 
-        trainer = trainer.Trainer(model, finetune_dataset, None, tconf)
+        trainer = trainer.Trainer(model, finetune_dataset, None, trainer_cfg)
         trainer.train()
         torch.save(model.state_dict(), args.writing_params_path)
         print(f"Model saved to {args.writing_params_path}")
