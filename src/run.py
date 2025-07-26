@@ -113,7 +113,7 @@ if __name__ == "__main__":
         ### YOUR CODE HERE ###
         tconf = trainer.TrainerConfig(
             max_epochs=650,  # 更保守的epochs数 (原来650)
-            batch_size=256,  # 保持2x batch size
+            batch_size=128,  # 保持2x batch size
             learning_rate=args.pretrain_lr,
             lr_decay=True,
             warmup_tokens=512*20,
@@ -141,8 +141,8 @@ if __name__ == "__main__":
             model.load_state_dict(torch.load(args.reading_params_path))
             print("pretrained model loaded")
             trainer_cfg = trainer.TrainerConfig(
-                max_epochs=10,  # 减少epochs避免过拟合
-                batch_size=128,  # 减少batch以更精细更新
+                max_epochs=15,  # 减少epochs避免过拟合
+                batch_size=256,  # 减少batch以更精细更新
                 learning_rate=args.finetune_lr,  # 恢复原lr 6e-4
                 lr_decay=True,
                 warmup_tokens=512 * 20,
