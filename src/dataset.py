@@ -99,37 +99,29 @@ class CharCorruptionDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        # TODO [part e]: see spec above
-        ### YOUR CODE HERE ###
         document = self.data[idx]
         if len(document) < 4:
             document = document + self.PAD_CHAR*(4 - len(document))
-        
-        random_trunc_len = min(random.randint(4, int(math.floor(7/8*self.block_size))), len(document))
-        random_trunc_start = random.randint(0, len(document)-random_trunc_len)
 
-        truncated_document = document[random_trunc_start:random_trunc_start+random_trunc_len]
+        trunc_len = random.randint(4, int(self.block_size * 7 / 8))
+        document = document[:trunc_len]
 
-        max_masked_len = max(1, len(truncated_document)//2)
-        len_masked = random.randint(1, max_masked_len)
-        rand_start_masked = random.randint(0, len(truncated_document)-len_masked)
-        masked_content = truncated_document[rand_start_masked:rand_start_masked+len_masked]
+        mask_len = trunc_len // 4
+        mask_len = mask_len + random.randint(-mask_len // 2, mask_len // 2)
+        mask_s = random.randint(0, trunc_len - mask_len)
+        mask_e = mask_s + mask_len
+        prefix, masked_content, suffix = document[:mask_s], document[mask_s:mask_e], document[mask_e:]
 
-        prefix = truncated_document[:rand_start_masked]
-        suffix = truncated_document[rand_start_masked+len_masked:]
+        masked_string = prefix + self.MASK_CHAR + suffix + self.MASK_CHAR + masked_content
+        pads = self.PAD_CHAR * (self.block_size + 1 - len(masked_string))
+        masked_string += pads
 
-        masked_string = prefix + self.MASK_CHAR + suffix + self.MASK_CHAR + masked_content + self.PAD_CHAR*(self.block_size - len(prefix) - len(suffix) - len(masked_content) - 1)
+        x = masked_string[:-1]
+        y = masked_string[1:]
 
-
-
-        x = torch.tensor([self.stoi[c] for c in masked_string[:-1]], dtype=torch.long)
-        y = torch.tensor([self.stoi[c] for c in masked_string[1:]], dtype=torch.long)
+        x = torch.tensor([self.stoi[c] for c in x], dtype=torch.long)
+        y = torch.tensor([self.stoi[c] for c in y], dtype=torch.long)
         return x, y
-
-
-
-
-        ### END YOUR CODE ###
 
 
 # The input-output pairs (x, y) of the NameDataset are of the following form:
@@ -163,10 +155,10 @@ class NameDataset(Dataset):
     def __getitem__(self, idx):
         inp, oup = self.data[idx].split('\t')
         x = inp + self.MASK_CHAR + oup + self.MASK_CHAR
-        x = x + self.PAD_CHAR*(self.block_size + 1 - len(x))  # +1 to make total length block_size+1
+        x = x + self.PAD_CHAR*(self.block_size - len(x))
         y = self.PAD_CHAR*(len(inp)-1) + x[len(inp):]
 
-        x = x[:-1]  # Now x has length block_size
+        x = x[:-1]
         x = torch.tensor([self.stoi[c] for c in x], dtype=torch.long)
         y = torch.tensor([self.stoi[c] for c in y], dtype=torch.long)
         return x, y
@@ -200,5 +192,8 @@ if __name__ == '__main__':
             x, y = example
             print('x:', ''.join([corruption_dataset.itos[int(c)] for c in x]))
             print('y:', ''.join([corruption_dataset.itos[int(c)] for c in y]))
+
+            print("length of x:", len(x))
+            print("length of y:", len(y))
     else:
         raise ValueError(f"Unknown dataset type in command line args: {args.dataset_type}")

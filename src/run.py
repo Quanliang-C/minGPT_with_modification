@@ -112,21 +112,21 @@ if __name__ == "__main__":
 
         ### YOUR CODE HERE ###
         tconf = trainer.TrainerConfig(
-            max_epochs=650,
-            batch_size=128,
+            max_epochs=1200,  # 更保守的epochs数 (原来650)
+            batch_size=256,  # 保持2x batch size
             learning_rate=args.pretrain_lr,
             lr_decay=True,
             warmup_tokens=512*20,
-            final_tokens=650*len(pretrain_dataset)*block_size,
+            final_tokens=1200*len(pretrain_dataset)*block_size,  # 相应调整final_tokens
             num_workers=4,
             writer=writer
         )
 
-        with open(args.pretrain_corpus_path, encoding='utf-8') as f:
-            pretrain_corpus = f.read()
+        # with open(args.pretrain_corpus_path, encoding='utf-8') as f:
+        #     pretrain_corpus = f.read()
 
-        pretrain_dataset = dataset.CharCorruptionDataset(pretrain_corpus, block_size)
-        print("pretrain dataset created")
+        # pretrain_dataset = dataset.CharCorruptionDataset(pretrain_corpus, block_size)
+        # print("pretrain dataset created")
         trainer = trainer.Trainer(model, pretrain_dataset, None, tconf)
         trainer.train()
         torch.save(model.state_dict(), args.writing_params_path)
@@ -141,9 +141,9 @@ if __name__ == "__main__":
             model.load_state_dict(torch.load(args.reading_params_path))
             print("pretrained model loaded")
             tconf = trainer.TrainerConfig(
-                max_epochs=10,
-                batch_size=256,
-                learning_rate=args.finetune_lr,
+                max_epochs=50,   # 增加epochs以更好学习映射
+                batch_size=512,  # 保持batch size
+                learning_rate=args.finetune_lr * 0.7,  # 稍微降低学习率
                 lr_decay=True,
                 warmup_tokens=512*20,
                 final_tokens=200*len(pretrain_dataset)*block_size,
@@ -152,8 +152,8 @@ if __name__ == "__main__":
             )
         else:
             tconf = trainer.TrainerConfig(
-                max_epochs=75,
-                batch_size=256,
+                max_epochs=40,   # 适中的epochs数
+                batch_size=512,  # 适中的batch size
                 learning_rate=args.finetune_lr,
                 lr_decay=True,
                 warmup_tokens=512*20,
